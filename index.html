@@ -164,8 +164,11 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 
 .btn-wa{width:100%;padding:12px;background:#25D366;color:var(--w);border:none;border-radius:12px;font-family:'Bebas Neue',cursive;font-size:1.07rem;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .18s;margin-bottom:6px;}
 .btn-wa:hover{background:#128C7E;}
-.btn-cuenta-sm{width:100%;padding:8px;background:transparent;color:var(--p);border:1.5px solid var(--p);border-radius:12px;font-family:'Bebas Neue',cursive;font-size:.84rem;letter-spacing:.8px;cursor:pointer;transition:all .18s;margin-bottom:6px;}
-.btn-cuenta-sm:hover{background:var(--p);color:var(--w);}
+.btn-atencion{width:100%;padding:8px 10px;background:transparent;color:var(--p);border:1.5px solid var(--p);border-radius:10px;font-family:'Bebas Neue',cursive;font-size:.82rem;letter-spacing:.8px;cursor:pointer;transition:all .18s;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:5px;}
+.btn-atencion:hover{background:var(--p);color:var(--w);}
+.aten-mot{padding:9px 12px;border:1.5px solid #ebebeb;border-radius:10px;font-size:.83rem;font-weight:700;cursor:pointer;transition:all .15s;color:#444;}
+.aten-mot:hover{border-color:var(--p);background:#f0f2ff;}
+.aten-mot.sel{border-color:var(--p);background:#e8eaf6;color:var(--p);}
 
 /* Redes en panel */
 .redes-panel{text-align:center;padding:7px 0 1px;}
@@ -281,19 +284,27 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
     <button class="pcb" onclick="closePanel()">✕</button>
   </div>
 
+  <!-- Nombre del cliente -->
+  <div style="margin-bottom:11px;">
+    <div class="ts-ttl">Tu nombre <span style="color:var(--s)">*</span></div>
+    <input class="dir-inp" id="cliente-nombre" placeholder="¿Cómo te llamamos?" type="text"
+           style="margin-top:5px;border-color:#e0e0e0;"/>
+  </div>
+
   <!-- Tipo de servicio -->
   <div id="tipo-servicio">
-    <div class="ts-ttl">¿Cómo lo quieres?</div>
+    <div class="ts-ttl">¿Cómo lo quieres? <span style="color:var(--s)">*</span></div>
     <div class="ts-opts" id="ts-opts"></div>
     <div id="mesa-inp">
       <div class="mesa-lbl">Elige tu mesa:</div>
       <div class="mesa-sel" id="mesa-sel"></div>
     </div>
     <div id="dom-inp">
-      <input class="dir-inp" id="dir-text" placeholder="Tu dirección completa…" type="text"/>
-      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:5px;">
+      <input class="dir-inp" id="dir-text" placeholder="Tu dirección completa…" type="text"
+             style="margin-top:6px;"/>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin:5px 0;">
         <button class="dir-link-btn" onclick="pedirUbicacionAuto()">📍 Usar mi ubicación</button>
-        <button class="dir-link-btn" onclick="abrirGoogleMaps()">🗺️ Abrir en Maps y copiar link</button>
+        <button class="dir-link-btn" onclick="abrirGoogleMaps()">🗺️ Abrir Maps</button>
       </div>
       <div id="envio-info"></div>
     </div>
@@ -312,11 +323,44 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
     <svg width="19" height="19" viewBox="0 0 32 32" fill="white"><path d="M16 3C8.82 3 3 8.82 3 16c0 2.39.63 4.63 1.74 6.57L3 29l6.57-1.72A12.93 12.93 0 0016 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm6.45 18.12c-.27.76-1.57 1.46-2.15 1.55-.55.08-1.25.12-2.01-.13-.46-.15-1.06-.35-1.82-.69-3.2-1.38-5.29-4.6-5.45-4.81-.16-.21-1.3-1.73-1.3-3.3s.82-2.34 1.11-2.66c.27-.3.59-.38.79-.38l.57.01c.18 0 .43-.07.67.51.27.64.9 2.2.98 2.36.08.16.13.35.03.56-.1.21-.16.34-.31.52-.16.18-.33.4-.47.54-.16.16-.32.33-.14.65.19.32.82 1.35 1.76 2.18 1.21 1.08 2.23 1.41 2.55 1.57.32.16.51.13.7-.08.19-.21.8-.93 1.01-1.25.21-.32.43-.27.72-.16.29.11 1.84.87 2.16 1.02.32.16.53.24.61.37.08.14.08.77-.19 1.52z"/></svg>
     Enviar Pedido por WhatsApp
   </button>
-  <button class="btn-cuenta-sm" onclick="pedirCuenta()">🧾 Solicitar cuenta / atención</button>
+  <button class="btn-atencion" onclick="abrirModalAtencion()">🔔 Solicitud de Atención</button>
 
   <div class="redes-panel" id="redes-panel" style="display:none">
     <p>Síguenos en redes</p>
     <div class="redes-icons" id="redes-icons"></div>
+  </div>
+</div>
+
+<!-- MODAL ATENCIÓN -->
+<div id="aten-ovl" onclick="cerrarModalAtencion(event)"
+     style="position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:900;display:none;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--w);border-radius:20px 20px 0 0;width:100%;max-width:680px;padding:18px 17px 34px;position:relative;animation:sUp .26s ease;">
+    <div style="width:34px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 14px;"></div>
+    <button onclick="cerrarModalAtencion(null,true)"
+            style="position:absolute;top:13px;right:14px;background:none;border:none;font-size:1.25rem;cursor:pointer;color:#bbb;">✕</button>
+    <div style="font-family:'Bebas Neue',cursive;font-size:1.25rem;color:var(--p);margin-bottom:3px;">🔔 Solicitud de Atención</div>
+    <div style="font-size:.73rem;color:#aaa;margin-bottom:13px;">Tu mensaje llegará al encargado por WhatsApp</div>
+
+    <div class="sec-ttl">Tu nombre</div>
+    <input class="dir-inp" id="aten-nombre" placeholder="¿Cómo te llamamos?" type="text" style="margin-bottom:11px;"/>
+
+    <div class="sec-ttl">Motivo de la atención</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;" id="aten-motivos">
+      <div class="aten-mot" data-val="Necesito hacer un pedido">📋 Necesito hacer un pedido</div>
+      <div class="aten-mot" data-val="Tengo una pregunta sobre el menú">❓ Tengo una pregunta sobre el menú</div>
+      <div class="aten-mot" data-val="Solicito la cuenta">🧾 Solicitar la cuenta</div>
+      <div class="aten-mot" data-val="Tengo un problema con mi pedido">⚠️ Tengo un problema con mi pedido</div>
+      <div class="aten-mot" data-val="Quiero dejar una sugerencia">💡 Quiero dejar una sugerencia</div>
+      <div class="aten-mot" data-val="Otro motivo">💬 Otro motivo</div>
+    </div>
+
+    <div class="sec-ttl">Comentario adicional (opcional)</div>
+    <textarea class="nota-inp" id="aten-nota" rows="2" placeholder="Detalla tu solicitud…" style="margin-bottom:14px;"></textarea>
+
+    <button class="btn-wa" onclick="enviarAtencion()" style="font-size:1rem;">
+      <svg width="17" height="17" viewBox="0 0 32 32" fill="white"><path d="M16 3C8.82 3 3 8.82 3 16c0 2.39.63 4.63 1.74 6.57L3 29l6.57-1.72A12.93 12.93 0 0016 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm6.45 18.12c-.27.76-1.57 1.46-2.15 1.55-.55.08-1.25.12-2.01-.13-.46-.15-1.06-.35-1.82-.69-3.2-1.38-5.29-4.6-5.45-4.81-.16-.21-1.3-1.73-1.3-3.3s.82-2.34 1.11-2.66c.27-.3.59-.38.79-.38l.57.01c.18 0 .43-.07.67.51.27.64.9 2.2.98 2.36.08.16.13.35.03.56-.1.21-.16.34-.31.52-.16.18-.33.4-.47.54-.16.16-.32.33-.14.65.19.32.82 1.35 1.76 2.18 1.21 1.08 2.23 1.41 2.55 1.57.32.16.51.13.7-.08.19-.21.8-.93 1.01-1.25.21-.32.43-.27.72-.16.29.11 1.84.87 2.16 1.02.32.16.53.24.61.37.08.14.08.77-.19 1.52z"/></svg>
+      Enviar al Encargado
+    </button>
   </div>
 </div>
 
@@ -490,18 +534,39 @@ function openModal(item){
   if(item.extras&&item.extras.length){
     eS.style.display="block";
     eG.innerHTML=item.extras.map((ex,i)=>`
-      <div class="ex-item" id="ex${i}" onclick="togEx(${i},'${esc(ex.nombre)}',${ex.precio})">
+      <div class="ex-item" id="ex${i}"
+           data-idx="${i}"
+           data-nombre="${ex.nombre.replace(/"/g,'').replace(/'/g,'')}"
+           data-precio="${ex.precio}">
         <div class="ex-chk" id="exc${i}">✓</div>
-        <span class="ex-name">${ex.nombre}</span>
+        <span class="ex-name">${ex.nombre.replace(/"/g,'').replace(/'/g,'')}</span>
         <span class="ex-price">${ex.precio>0?"+$"+ex.precio:"incluido"}</span>
       </div>`).join("");
+    // Event listener delegado — no depende de onclick inline
+    eG.onclick = function(e){
+      const el = e.target.closest(".ex-item");
+      if(!el) return;
+      const i      = parseInt(el.dataset.idx);
+      const nombre = el.dataset.nombre;
+      const precio = parseFloat(el.dataset.precio)||0;
+      togEx(i, nombre, precio, el);
+    };
   }else{ eS.style.display="none"; }
 
   const rS=document.getElementById("sec-rm"), rG=document.getElementById("m-remov");
   if(item.removibles&&item.removibles.length){
     rS.style.display="block";
-    rG.innerHTML=item.removibles.map((r,i)=>
-      `<div class="r-chip" id="rc${i}" onclick="togRem(${i},'${esc(r)}')">Sin ${r}</div>`).join("");
+    rG.innerHTML=item.removibles.map((r,i)=>`
+      <div class="r-chip" id="rc${i}"
+           data-idx="${i}"
+           data-nombre="${r.replace(/"/g,'').replace(/'/g,'')}">
+        Sin ${r.replace(/"/g,'').replace(/'/g,'')}
+      </div>`).join("");
+    rG.onclick = function(e){
+      const el = e.target.closest(".r-chip");
+      if(!el) return;
+      togRem(parseInt(el.dataset.idx), el.dataset.nombre, el);
+    };
   }else{ rS.style.display="none"; }
 
   recalcM();
@@ -512,18 +577,16 @@ function openModal(item){
 function ovlM(e){ if(e.target.id==="movl") closeModal(); }
 function closeModal(){ document.getElementById("movl").classList.remove("open"); document.body.style.overflow=""; }
 
-function togEx(i,nombre,precio){
-  const el=document.getElementById("ex"+i);
-  const idx=mExtras.findIndex(e=>e.nombre===nombre);
-  if(idx>=0){mExtras.splice(idx,1);el.classList.remove("sel");}
-  else{mExtras.push({nombre,precio});el.classList.add("sel");}
+function togEx(i, nombre, precio, el){
+  const idx = mExtras.findIndex(e=>e.nombre===nombre);
+  if(idx>=0){ mExtras.splice(idx,1); el.classList.remove("sel"); }
+  else{ mExtras.push({nombre, precio}); el.classList.add("sel"); }
   recalcM();
 }
-function togRem(i,nombre){
-  const el=document.getElementById("rc"+i);
-  const idx=mRemov.indexOf(nombre);
-  if(idx>=0){mRemov.splice(idx,1);el.classList.remove("rem");}
-  else{mRemov.push(nombre);el.classList.add("rem");}
+function togRem(i, nombre, el){
+  const idx = mRemov.indexOf(nombre);
+  if(idx>=0){ mRemov.splice(idx,1); el.classList.remove("rem"); }
+  else{ mRemov.push(nombre); el.classList.add("rem"); }
 }
 function mQty(d){ mQtyVal=Math.max(1,mQtyVal+d); st("m-qty",mQtyVal); recalcM(); }
 function recalcM(){
@@ -609,7 +672,25 @@ function closePanel(){ document.getElementById("order-panel").classList.remove("
 
 // ── WHATSAPP ──────────────────────────────────────────────────────
 function sendWA(){
+  // Validar nombre
+  const nombre = document.getElementById("cliente-nombre").value.trim();
+  if(!nombre){
+    document.getElementById("cliente-nombre").style.borderColor="var(--s)";
+    document.getElementById("cliente-nombre").focus();
+    alert("Por favor escribe tu nombre para continuar.");
+    return;
+  }
+  document.getElementById("cliente-nombre").style.borderColor="#e0e0e0";
+
+  // Validar tipo de servicio
+  if(!tipoServicio){
+    alert("Por favor selecciona cómo quieres tu pedido.");
+    return;
+  }
+
+  // Validar que haya al menos un producto
   if(!orden.length){ alert("Agrega al menos un producto."); return; }
+
   const sub=orden.reduce((s,o)=>s+(o.pu>0?o.pu*o.qty:0),0);
   const costoEnv=parseInt(cfg.domicilio_costo)||0;
   const minGratis=parseInt(cfg.domicilio_minimo_gratis)||0;
@@ -617,16 +698,16 @@ function sendWA(){
   const envio=esEnv?((minGratis>0&&sub>=minGratis)?0:costoEnv):0;
 
   let srv="";
-  if(tipoServicio==="mesa")      srv=mesaSel?`Mesa #${mesaSel}`:"Comer aquí";
+  if(tipoServicio==="mesa")      srv=mesaSel?`Mesa #${mesaSel}`:"Comer aquí 🪑";
   if(tipoServicio==="llevar")    srv="Para llevar 🥡";
   if(tipoServicio==="domicilio"){
     const dir=document.getElementById("dir-text").value.trim();
-    srv=`A domicilio 🛵${dir?" — "+dir:""}`;
+    srv=`A domicilio 🛵${dir?" — "+dir:" (sin dirección)"}`;
   }
 
   let msg=`🌸 *${cfg.header_titulo||"Flor de Azalea"}*\n`;
-  if(srv) msg+=`📍 ${srv}\n`;
-  msg+="\n";
+  msg+=`👤 *Cliente:* ${nombre}\n`;
+  msg+=`📍 *Servicio:* ${srv}\n\n`;
   orden.forEach((o,i)=>{
     msg+=`${i+1}. ${o.nombre} x${o.qty}`;
     if(o.pu>0) msg+=` — $${o.pu*o.qty}`;
@@ -635,7 +716,7 @@ function sendWA(){
   });
   if(sub>0){
     msg+=`\n💰 Subtotal: $${sub}`;
-    if(esEnv) msg+=`\n🛵 Envío: ${envio===0?"Gratis":"$"+envio}`;
+    if(esEnv) msg+=`\n🛵 Envío: ${envio===0?"Gratis 🎉":"$"+envio}`;
     msg+=`\n✅ *Total: $${sub+envio}*`;
   }
   const nota=document.getElementById("onote").value.trim();
@@ -643,9 +724,47 @@ function sendWA(){
   window.open(`https://wa.me/${cfg.telefono||""}?text=${encodeURIComponent(msg)}`,"_blank");
 }
 
-function pedirCuenta(){
-  const nom=cfg.header_titulo||"el restaurante";
-  window.open(`https://wa.me/${cfg.telefono||""}?text=${encodeURIComponent("🧾 Hola, quisiera solicitar la cuenta / atención en "+nom+".")}` ,"_blank");
+// ── MODAL ATENCIÓN ────────────────────────────────────────────────
+let atenMotivo = "";
+
+function abrirModalAtencion(){
+  // Pre-llenar nombre si ya lo escribió en el pedido
+  const nombrePedido = document.getElementById("cliente-nombre").value.trim();
+  if(nombrePedido) document.getElementById("aten-nombre").value = nombrePedido;
+  atenMotivo = "";
+  document.querySelectorAll(".aten-mot").forEach(el=>el.classList.remove("sel"));
+  document.getElementById("aten-nota").value = "";
+  // Delegado de clicks en motivos
+  document.getElementById("aten-motivos").onclick = function(e){
+    const el = e.target.closest(".aten-mot");
+    if(!el) return;
+    document.querySelectorAll(".aten-mot").forEach(m=>m.classList.remove("sel"));
+    el.classList.add("sel");
+    atenMotivo = el.dataset.val;
+  };
+  document.getElementById("aten-ovl").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModalAtencion(e, forzar){
+  if(forzar || (e && e.target.id==="aten-ovl")){
+    document.getElementById("aten-ovl").style.display = "none";
+    document.body.style.overflow = "";
+  }
+}
+
+function enviarAtencion(){
+  const nombre = document.getElementById("aten-nombre").value.trim();
+  if(!nombre){ alert("Por favor escribe tu nombre."); return; }
+  if(!atenMotivo){ alert("Selecciona el motivo de tu solicitud."); return; }
+  const nota = document.getElementById("aten-nota").value.trim();
+  let msg = `🔔 *Solicitud de Atención — ${cfg.header_titulo||"Flor de Azalea"}*\n\n`;
+  msg += `👤 *Nombre:* ${nombre}\n`;
+  msg += `📌 *Motivo:* ${atenMotivo}\n`;
+  if(nota) msg += `💬 *Comentario:* ${nota}`;
+  const tel = cfg.telefono_atencion || cfg.telefono || "";
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`,"_blank");
+  cerrarModalAtencion(null, true);
 }
 
 function irOpinion(){
