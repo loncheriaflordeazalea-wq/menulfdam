@@ -77,7 +77,8 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 #modal{background:var(--w);border-radius:20px 20px 0 0;width:100%;max-width:680px;padding:15px 15px 34px;max-height:91vh;overflow-y:auto;animation:sUp .26s ease;position:relative;}
 @keyframes sUp{from{transform:translateY(55px);opacity:0}to{transform:translateY(0);opacity:1}}
 .m-handle{width:34px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 12px;}
-.m-close{position:absolute;top:13px;right:14px;background:none;border:none;font-size:1.25rem;cursor:pointer;color:#bbb;}
+.m-close{position:absolute;top:10px;right:12px;background:#f0f0f0;border:none;font-size:1rem;cursor:pointer;color:#555;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;transition:background .15s;}
+.m-close:hover{background:#e0e0e0;color:#222;}
 .m-title{font-family:'Bebas Neue',cursive;font-size:1.28rem;color:var(--p);}
 .m-desc{font-size:.72rem;color:#aaa;margin:2px 0 10px;}
 .base-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#f8f9ff;border-radius:10px;margin-bottom:11px;}
@@ -426,14 +427,14 @@ function aplicarCfg(){
   document.title = cfg.header_titulo || "Menú Digital";
 
   // Banner
-  if(cfg.banner_activo==="SI" && cfg.banner_texto){
+  if(esSI(cfg.banner_activo) && cfg.banner_texto){
     const b = document.getElementById("banner");
     b.innerHTML = cfg.banner_texto;
     b.style.display = "block";
   }
 
   // Historia
-  if(cfg.historia_activo==="SI" && cfg.historia_texto){
+  if(esSI(cfg.historia_activo) && cfg.historia_texto){
     st("hist-emoji", cfg.historia_emoji  || "📖");
     st("hist-ttl",   cfg.historia_titulo || "Nuestra Historia");
     st("hist-txt",   cfg.historia_texto  || "");
@@ -443,7 +444,7 @@ function aplicarCfg(){
 
 // ── PROMOS ────────────────────────────────────────────────────────
 function renderPromos(promos){
-  if(!promos.length || cfg.promos_activo!=="SI") return;
+  if(!promos.length || !esSI(cfg.promos_activo)) return;
   st("promos-ttl", cfg.promos_titulo || "🔥 Promociones");
   document.getElementById("promos-lista").innerHTML = promos.map(p=>`
     <div class="promo-card">
@@ -489,12 +490,15 @@ function renderMenu(cats){
 function togCat(h){ h.classList.toggle("open"); h.nextElementSibling.classList.toggle("open"); }
 
 // ── TIPO DE SERVICIO ──────────────────────────────────────────────
+// Helper: acepta SI/Si/si/sí
+function esSI(val){ return String(val||"").trim().toUpperCase()==="SI"; }
+
 function renderTipoServicio(){
   const opts = document.getElementById("ts-opts"); opts.innerHTML="";
   const srvs = [];
-  if(cfg.mesa_activo==="SI")        srvs.push({id:"mesa",    lbl:"🪑 Comer aquí"});
-  if(cfg.para_llevar_activo==="SI") srvs.push({id:"llevar",  lbl:"🥡 Para llevar"});
-  if(cfg.domicilio_activo==="SI")   srvs.push({id:"domicilio",lbl:"🛵 A domicilio"});
+  if(esSI(cfg.mesa_activo))         srvs.push({id:"mesa",     lbl:"🪑 Comer aquí"});
+  if(esSI(cfg.para_llevar_activo))  srvs.push({id:"llevar",   lbl:"🥡 Para llevar"});
+  if(esSI(cfg.domicilio_activo))    srvs.push({id:"domicilio",lbl:"🛵 A domicilio"});
   srvs.forEach(s=>{
     const b=document.createElement("button");
     b.className="ts-btn"; b.dataset.id=s.id; b.textContent=s.lbl;
@@ -811,7 +815,7 @@ function abrirGoogleMaps(){
 // ── REDES ─────────────────────────────────────────────────────────
 // Se llama una vez al cargar — pinta la sección fija debajo del menú
 function renderRedesFijas(){
-  if(cfg.redes_activo!=="SI") return;
+  if(!esSI(cfg.redes_activo)) return;
   const redes = buildRedes();
   if(!redes.length) return;
 
@@ -828,7 +832,7 @@ function renderRedesFijas(){
 }
 
 function renderRedes(){
-  if(cfg.redes_activo!=="SI") return;
+  if(!esSI(cfg.redes_activo)) return;
   const redes = buildRedes();
   if(!redes.length) return;
   document.getElementById("redes-icons").innerHTML =
