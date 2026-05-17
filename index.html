@@ -74,12 +74,16 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 /* ── MODAL ── */
 #movl{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:600;display:none;align-items:flex-end;justify-content:center;}
 #movl.open{display:flex;}
-#modal{background:var(--w);border-radius:20px 20px 0 0;width:100%;max-width:680px;padding:15px 15px 34px;max-height:91vh;overflow-y:auto;animation:sUp .26s ease;position:relative;}
+/* wrap contiene X fija + contenido scrolleable */
+#modal-wrap{position:relative;width:100%;max-width:680px;max-height:91vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;overflow:hidden;animation:sUp .26s ease;}
 @keyframes sUp{from{transform:translateY(55px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* X siempre pegada arriba, nunca entra al scroll */
+.m-close{position:absolute;top:10px;right:12px;z-index:20;background:#e0e0e0;border:none;font-size:.9rem;cursor:pointer;color:#333;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.18);transition:background .15s;}
+.m-close:hover{background:#c8c8c8;}
+/* contenido scrolleable */
+#modal{background:var(--w);padding:15px 15px 34px;overflow-y:auto;flex:1;}
 .m-handle{width:34px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 12px;}
-.m-close{position:absolute;top:10px;right:12px;background:#f0f0f0;border:none;font-size:1rem;cursor:pointer;color:#555;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;transition:background .15s;}
-.m-close:hover{background:#e0e0e0;color:#222;}
-.m-title{font-family:'Bebas Neue',cursive;font-size:1.28rem;color:var(--p);}
+.m-title{font-family:'Bebas Neue',cursive;font-size:1.28rem;color:var(--p);padding-right:36px;}
 .m-desc{font-size:.72rem;color:#aaa;margin:2px 0 10px;}
 .base-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#f8f9ff;border-radius:10px;margin-bottom:11px;}
 .base-lbl{font-weight:700;font-size:.84rem;}
@@ -245,35 +249,39 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 
 <!-- MODAL PERSONALIZACIÓN -->
 <div id="movl" onclick="ovlM(event)">
-  <div id="modal">
-    <div class="m-handle"></div>
+  <div id="modal-wrap">
+    <!-- X FIJA — siempre visible -->
     <button class="m-close" onclick="closeModal()">✕</button>
-    <div class="m-title" id="mt"></div>
-    <div class="m-desc"  id="md"></div>
-    <div class="base-row">
-      <span class="base-lbl">Precio base</span>
-      <span class="base-val" id="mb"></span>
+    <!-- contenido con scroll -->
+    <div id="modal">
+      <div class="m-handle"></div>
+      <div class="m-title" id="mt"></div>
+      <div class="m-desc"  id="md"></div>
+      <div class="base-row">
+        <span class="base-lbl">Precio base</span>
+        <span class="base-val" id="mb"></span>
+      </div>
+      <div id="sec-ex">
+        <div class="sec-ttl">Elige relleno / extras</div>
+        <div class="extras-list" id="m-extras"></div>
+      </div>
+      <div id="sec-rm">
+        <div class="sec-ttl">Quitar ingredientes</div>
+        <div class="remov-wrap" id="m-remov"></div>
+      </div>
+      <div class="sec-ttl">Nota especial</div>
+      <textarea class="nota-inp" id="m-nota" rows="2" placeholder="Sin cebolla, extra salsa…"></textarea>
+      <div class="qty-row">
+        <button class="qb minus" onclick="mQty(-1)">−</button>
+        <span class="q-num" id="m-qty">1</span>
+        <button class="qb plus"  onclick="mQty(1)">+</button>
+      </div>
+      <div class="m-tot-row">
+        <span class="m-tot-lbl">Total</span>
+        <span class="m-tot-val" id="m-tot">$0</span>
+      </div>
+      <button class="btn-add" onclick="addFromModal()">+ Agregar al Pedido</button>
     </div>
-    <div id="sec-ex">
-      <div class="sec-ttl">Elige relleno / extras</div>
-      <div class="extras-list" id="m-extras"></div>
-    </div>
-    <div id="sec-rm">
-      <div class="sec-ttl">Quitar ingredientes</div>
-      <div class="remov-wrap" id="m-remov"></div>
-    </div>
-    <div class="sec-ttl">Nota especial</div>
-    <textarea class="nota-inp" id="m-nota" rows="2" placeholder="Sin cebolla, extra salsa…"></textarea>
-    <div class="qty-row">
-      <button class="qb minus" onclick="mQty(-1)">−</button>
-      <span class="q-num" id="m-qty">1</span>
-      <button class="qb plus"  onclick="mQty(1)">+</button>
-    </div>
-    <div class="m-tot-row">
-      <span class="m-tot-lbl">Total</span>
-      <span class="m-tot-val" id="m-tot">$0</span>
-    </div>
-    <button class="btn-add" onclick="addFromModal()">+ Agregar al Pedido</button>
   </div>
 </div>
 
@@ -301,12 +309,10 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
       <div class="mesa-sel" id="mesa-sel"></div>
     </div>
     <div id="dom-inp">
-      <input class="dir-inp" id="dir-text" placeholder="Tu dirección completa…" type="text"
-             style="margin-top:6px;"/>
-      <div style="display:flex;gap:7px;flex-wrap:wrap;margin:5px 0;">
-        <button class="dir-link-btn" onclick="pedirUbicacionAuto()">📍 Usar mi ubicación</button>
-        <button class="dir-link-btn" onclick="abrirGoogleMaps()">🗺️ Abrir Maps</button>
-      </div>
+      <input class="dir-inp" id="dir-text" placeholder="Tu dirección (se llenará automático o escribe)" type="text" style="margin-top:6px;"/>
+      <button class="dir-link-btn" onclick="pedirUbicacionAuto()" style="margin-top:4px;">
+        📍 Compartir mi ubicación
+      </button>
       <div id="envio-info"></div>
     </div>
   </div>
@@ -782,34 +788,27 @@ function irOpinion(){
 
 function pedirUbicacionAuto(){
   const inp = document.getElementById("dir-text");
-  // iOS Safari requiere HTTPS y permiso explícito
   if(!navigator.geolocation){
-    abrirGoogleMaps(); return;
+    inp.placeholder = "Escribe tu dirección completa…";
+    inp.focus();
+    return;
   }
   inp.placeholder = "Obteniendo ubicación…";
+  inp.disabled = true;
   navigator.geolocation.getCurrentPosition(
     pos=>{
-      const url = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
-      inp.value = url;
+      inp.value = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
       inp.placeholder = "Tu dirección completa…";
+      inp.disabled = false;
     },
-    err=>{
-      inp.placeholder = "Tu dirección completa…";
-      // En iOS muchas veces falla — abrimos Maps directo
-      abrirGoogleMaps();
+    ()=>{
+      // Si falla simplemente deja el campo libre para que escriba
+      inp.placeholder = "Escribe tu dirección completa…";
+      inp.disabled = false;
+      inp.focus();
     },
     { enableHighAccuracy:true, timeout:8000 }
   );
-}
-
-function abrirGoogleMaps(){
-  // Abre Google Maps — el usuario copia el link de su ubicación y lo pega en el campo
-  window.open("https://maps.google.com","_blank");
-  setTimeout(()=>{
-    const inp = document.getElementById("dir-text");
-    inp.placeholder = "Pega aquí el link de tu ubicación de Maps…";
-    inp.focus();
-  }, 500);
 }
 
 // ── REDES ─────────────────────────────────────────────────────────
