@@ -131,7 +131,7 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 #dom-inp{margin-top:7px;display:none;}
 .dir-inp{width:100%;padding:7px 10px;border:1.5px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.81rem;margin-bottom:5px;}
 .dir-inp:focus{outline:none;border-color:var(--p);}
-.dir-link-btn{font-size:.74rem;color:var(--p);font-weight:700;cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;}
+.dir-link-btn{font-size:.74rem;color:var(--p);font-weight:700;cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;white-space:nowrap;}
 #envio-info{font-size:.71rem;color:#888;margin-top:4px;}
 .envio-gratis{color:#43a047;font-weight:700;}
 
@@ -228,6 +228,14 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 <div id="loading"><div class="spin"></div><p>Cargando menú…</p></div>
 <div id="menu"></div>
 
+<!-- REDES SOCIALES FIJAS -->
+<div id="redes-fijas" style="display:none;max-width:680px;margin:2px auto 10px;padding:0 11px;">
+  <div style="background:var(--w);border-radius:var(--rad);padding:14px 16px;box-shadow:0 2px 8px var(--sh);text-align:center;">
+    <p id="redes-fijas-ttl" style="font-size:.72rem;font-weight:800;color:var(--p);text-transform:uppercase;letter-spacing:.7px;margin-bottom:11px;">📲 Síguenos en redes sociales</p>
+    <div id="redes-fijas-icons" style="display:flex;justify-content:center;gap:22px;flex-wrap:wrap;align-items:center;"></div>
+  </div>
+</div>
+
 <!-- FAB -->
 <div id="cart-fab" onclick="openPanel()">🛒<div id="cbadge">0</div></div>
 
@@ -283,7 +291,10 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
     </div>
     <div id="dom-inp">
       <input class="dir-inp" id="dir-text" placeholder="Tu dirección completa…" type="text"/>
-      <button class="dir-link-btn" onclick="pedirUbicacion()">📍 Compartir mi ubicación</button>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:5px;">
+        <button class="dir-link-btn" onclick="pedirUbicacionAuto()">📍 Usar mi ubicación</button>
+        <button class="dir-link-btn" onclick="abrirGoogleMaps()">🗺️ Abrir en Maps y copiar link</button>
+      </div>
       <div id="envio-info"></div>
     </div>
   </div>
@@ -338,6 +349,7 @@ async function cargar(){
     renderHistoria();
     renderMenu(d.categorias || {});
     renderTipoServicio();
+    renderRedesFijas();
   }catch(e){
     document.getElementById("loading").innerHTML=
       '<p style="color:var(--s);font-weight:700">Error al cargar. Recarga la página.</p>';
@@ -645,26 +657,83 @@ function irOpinion(){
   }
 }
 
-function pedirUbicacion(){
-  if(!navigator.geolocation){ alert("Tu navegador no soporta geolocalización."); return; }
+function pedirUbicacionAuto(){
+  const inp = document.getElementById("dir-text");
+  // iOS Safari requiere HTTPS y permiso explícito
+  if(!navigator.geolocation){
+    abrirGoogleMaps(); return;
+  }
+  inp.placeholder = "Obteniendo ubicación…";
   navigator.geolocation.getCurrentPosition(
-    pos=>{ document.getElementById("dir-text").value=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`; },
-    ()=>alert("No se pudo obtener ubicación. Escribe tu dirección manualmente.")
+    pos=>{
+      const url = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+      inp.value = url;
+      inp.placeholder = "Tu dirección completa…";
+    },
+    err=>{
+      inp.placeholder = "Tu dirección completa…";
+      // En iOS muchas veces falla — abrimos Maps directo
+      abrirGoogleMaps();
+    },
+    { enableHighAccuracy:true, timeout:8000 }
   );
 }
 
-// ── REDES EN PANEL ────────────────────────────────────────────────
+function abrirGoogleMaps(){
+  // Abre Google Maps — el usuario copia el link de su ubicación y lo pega en el campo
+  window.open("https://maps.google.com","_blank");
+  setTimeout(()=>{
+    const inp = document.getElementById("dir-text");
+    inp.placeholder = "Pega aquí el link de tu ubicación de Maps…";
+    inp.focus();
+  }, 500);
+}
+
+// ── REDES ─────────────────────────────────────────────────────────
+// Se llama una vez al cargar — pinta la sección fija debajo del menú
+function renderRedesFijas(){
+  if(cfg.redes_activo!=="SI") return;
+  const redes = buildRedes();
+  if(!redes.length) return;
+
+  const html = redes.map(r=>`
+    <a href="${cfg[r.key]}" target="_blank" rel="noopener"
+       style="display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;transition:transform .18s;"
+       onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+      ${r.svg}
+      <span style="font-size:.63rem;font-weight:800;color:${r.color};">${r.label}</span>
+    </a>`).join("");
+
+  document.getElementById("redes-fijas-icons").innerHTML = html;
+  document.getElementById("redes-fijas").style.display = "block";
+}
+
 function renderRedes(){
   if(cfg.redes_activo!=="SI") return;
-  const redes=[
-    {key:"facebook_url", icon:"📘"},
-    {key:"instagram_url",icon:"📸"},
-    {key:"tiktok_url",   icon:"🎵"},
-  ].filter(r=>cfg[r.key]&&!cfg[r.key].includes("PON_TU"));
+  const redes = buildRedes();
   if(!redes.length) return;
-  document.getElementById("redes-icons").innerHTML=
-    redes.map(r=>`<a class="red-a" href="${cfg[r.key]}" target="_blank">${r.icon}</a>`).join("");
-  document.getElementById("redes-panel").style.display="block";
+  document.getElementById("redes-icons").innerHTML =
+    redes.map(r=>`
+      <a class="red-a" href="${cfg[r.key]}" target="_blank" rel="noopener"
+         style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;">
+        ${r.svg.replace('width="32" height="32"','width="26" height="26"')}
+        <span style="font-size:.58rem;font-weight:700;color:${r.color};">${r.label}</span>
+      </a>`).join("");
+  document.getElementById("redes-panel").style.display = "block";
+}
+
+function buildRedes(){
+  const SVG = {
+    facebook: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>`,
+    instagram:`<svg width="32" height="32" viewBox="0 0 24 24"><defs><radialGradient id="ig" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><path fill="url(#ig)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`,
+    tiktok:   `<svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>`,
+  };
+
+  return [
+    {key:"facebook_url",  svg: SVG.facebook,  label:"Facebook",  color:"#1877F2"},
+    {key:"instagram_url", svg: SVG.instagram, label:"Instagram", color:"#E1306C"},
+    {key:"tiktok_url",    svg: SVG.tiktok,    label:"TikTok",    color:"#000"},
+  ].filter(r => cfg[r.key] && !cfg[r.key].includes("PON_TU"));
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────
