@@ -74,14 +74,16 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 /* ── MODAL ── */
 #movl{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:600;display:none;align-items:flex-end;justify-content:center;}
 #movl.open{display:flex;}
-/* wrap contiene X fija + contenido scrolleable */
+/* wrap contiene X fija + scroll + footer fijo abajo */
 #modal-wrap{position:relative;width:100%;max-width:680px;max-height:91vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;overflow:hidden;animation:sUp .26s ease;}
 @keyframes sUp{from{transform:translateY(55px);opacity:0}to{transform:translateY(0);opacity:1}}
 /* X siempre pegada arriba, nunca entra al scroll */
 .m-close{position:absolute;top:10px;right:12px;z-index:20;background:#e0e0e0;border:none;font-size:.9rem;cursor:pointer;color:#333;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.18);transition:background .15s;}
 .m-close:hover{background:#c8c8c8;}
-/* contenido scrolleable */
-#modal{background:var(--w);padding:15px 15px 34px;overflow-y:auto;flex:1;}
+/* contenido scrolleable — sin padding abajo grande */
+#modal{background:var(--w);padding:15px 15px 8px;overflow-y:auto;flex:1;}
+/* footer fijo abajo — botón siempre visible */
+#modal-footer{background:var(--w);padding:8px 15px 22px;border-top:1.5px solid #f0f0f0;flex-shrink:0;}
 .m-handle{width:34px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 12px;}
 .m-title{font-family:'Bebas Neue',cursive;font-size:1.28rem;color:var(--p);padding-right:36px;}
 .m-desc{font-size:.72rem;color:#aaa;margin:2px 0 10px;}
@@ -276,6 +278,9 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
         <span class="q-num" id="m-qty">1</span>
         <button class="qb plus"  onclick="mQty(1)">+</button>
       </div>
+    </div>
+    <!-- FOOTER FIJO — total y botón siempre visibles -->
+    <div id="modal-footer">
       <div class="m-tot-row">
         <span class="m-tot-lbl">Total</span>
         <span class="m-tot-val" id="m-tot">$0</span>
@@ -716,8 +721,10 @@ function sendWA(){
   }
 
   let msg=`🌸 *${cfg.header_titulo||"Flor de Azalea"}*\n`;
+  if(cfg.header_subtitulo) msg+=`📍 *Sucursal:* ${cfg.header_subtitulo}\n`;
+  if(cfg.direccion) msg+=`🗺️ *Dirección:* ${cfg.direccion}\n`;
   msg+=`👤 *Cliente:* ${nombre}\n`;
-  msg+=`📍 *Servicio:* ${srv}\n\n`;
+  msg+=`🛍️ *Servicio:* ${srv}\n\n`;
   orden.forEach((o,i)=>{
     msg+=`${i+1}. ${o.nombre} x${o.qty}`;
     if(o.pu>0) msg+=` — $${o.pu*o.qty}`;
