@@ -72,19 +72,22 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 .btn-ver:hover{background:var(--s);}
 
 /* ── MODAL ── */
-#movl{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:600;display:none;align-items:flex-end;justify-content:center;}
+#movl{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:600;display:none;
+  flex-direction:column;align-items:center;justify-content:flex-end;}
 #movl.open{display:flex;}
-#modal-wrap{width:100%;max-width:680px;max-height:91vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;overflow:hidden;animation:sUp .26s ease;}
-@keyframes sUp{from{transform:translateY(55px);opacity:0}to{transform:translateY(0);opacity:1}}
-/* X completamente fija — siempre visible en pantalla */
-#modal-x{position:fixed;z-index:700;
+/* X vive FUERA del scroll — empuja el modal-wrap hacia abajo */
+#modal-x{
   background:#fff;border:2px solid #ddd;cursor:pointer;color:#333;
-  width:40px;height:40px;border-radius:50%;
-  display:none;align-items:center;justify-content:center;
-  font-weight:900;font-size:1.15rem;
-  box-shadow:0 3px 12px rgba(0,0,0,.35);
-  /* posición: esquina superior derecha del modal — se calcula en JS */
-  bottom:auto;right:16px;top:auto;}
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.2rem;
+  box-shadow:0 3px 12px rgba(0,0,0,.4);
+  margin-bottom:8px;align-self:flex-end;margin-right:16px;}
+#modal-x:hover{background:#f0f0f0;}
+/* wrap ocupa lo que queda abajo */
+#modal-wrap{width:100%;max-width:680px;max-height:88vh;display:flex;flex-direction:column;
+  border-radius:20px 20px 0 0;overflow:hidden;animation:sUp .26s ease;flex-shrink:0;}
+@keyframes sUp{from{transform:translateY(55px);opacity:0}to{transform:translateY(0);opacity:1}}
 #modal{background:var(--w);padding:15px 15px 8px;overflow-y:auto;flex:1;}
 #modal-footer{background:var(--w);padding:8px 15px 22px;border-top:1.5px solid #f0f0f0;flex-shrink:0;}
 .m-handle{width:34px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 12px;}
@@ -590,23 +593,12 @@ function openModal(item){
   recalcM();
   document.getElementById("movl").classList.add("open");
   document.body.style.overflow="hidden";
-  // Posicionar X justo encima del panel — esperar a que el DOM pinte
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      const wrap = document.getElementById("modal-wrap");
-      const rect = wrap.getBoundingClientRect();
-      const x = document.getElementById("modal-x");
-      x.style.top  = (rect.top - 50) + "px";
-      x.style.right = "16px";
-      x.style.display = "flex";
-    });
-  });
+}
 }
 
 function ovlM(e){ if(e.target.id==="movl") closeModal(); }
 function closeModal(){
   document.getElementById("movl").classList.remove("open");
-  document.getElementById("modal-x").style.display="none";
   document.body.style.overflow="";
 }
 
