@@ -77,9 +77,15 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 /* wrap contiene X fija + scroll + footer fijo abajo */
 #modal-wrap{position:relative;width:100%;max-width:680px;max-height:91vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;overflow:hidden;animation:sUp .26s ease;}
 @keyframes sUp{from{transform:translateY(55px);opacity:0}to{transform:translateY(0);opacity:1}}
-/* X siempre pegada arriba, nunca entra al scroll */
-.m-close{position:absolute;top:10px;right:12px;z-index:20;background:#e0e0e0;border:none;font-size:.9rem;cursor:pointer;color:#333;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.18);transition:background .15s;}
-.m-close:hover{background:#c8c8c8;}
+/* X FLOTANTE — vive en el overlay, nunca en el scroll */
+#modal-x{display:none;position:absolute;bottom:calc(91vh + 8px);right:12px;z-index:660;
+  background:#fff;border:none;cursor:pointer;color:#333;
+  width:38px;height:38px;border-radius:50%;
+  align-items:center;justify-content:center;
+  font-weight:900;font-size:1.1rem;
+  box-shadow:0 2px 10px rgba(0,0,0,.3);transition:background .15s;}
+#modal-x:hover{background:#f0f0f0;}
+#movl.open #modal-x{display:flex;}
 /* contenido scrolleable — sin padding abajo grande */
 #modal{background:var(--w);padding:15px 15px 8px;overflow-y:auto;flex:1;}
 /* footer fijo abajo — botón siempre visible */
@@ -251,9 +257,9 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 
 <!-- MODAL PERSONALIZACIÓN -->
 <div id="movl" onclick="ovlM(event)">
+  <!-- X FUERA DEL MODAL — siempre visible sobre todo -->
+  <button id="modal-x" onclick="closeModal()">✕</button>
   <div id="modal-wrap">
-    <!-- X FIJA — siempre visible -->
-    <button class="m-close" onclick="closeModal()">✕</button>
     <!-- contenido con scroll -->
     <div id="modal">
       <div class="m-handle"></div>
@@ -745,20 +751,37 @@ function sendWA(){
 let atenMotivo = "";
 
 function abrirModalAtencion(){
-  // Pre-llenar nombre si ya lo escribió en el pedido
   const nombrePedido = document.getElementById("cliente-nombre").value.trim();
   if(nombrePedido) document.getElementById("aten-nombre").value = nombrePedido;
   atenMotivo = "";
-  document.querySelectorAll(".aten-mot").forEach(el=>el.classList.remove("sel"));
   document.getElementById("aten-nota").value = "";
-  // Delegado de clicks en motivos
-  document.getElementById("aten-motivos").onclick = function(e){
+
+  // Construir opciones desde GS (atencion_opcion_1, _2, _3...)
+  const contenedor = document.getElementById("aten-motivos");
+  const opciones = [];
+  let i = 1;
+  while(cfg[`atencion_opcion_${i}`]){
+    opciones.push(cfg[`atencion_opcion_${i}`]);
+    i++;
+  }
+  // Fallback si no hay opciones configuradas
+  if(!opciones.length){
+    opciones.push("📋 Necesito hacer un pedido","❓ Pregunta sobre el menú",
+      "🧾 Solicitar la cuenta","⚠️ Problema con mi pedido",
+      "💡 Dejar una sugerencia","💬 Otro motivo");
+  }
+  contenedor.innerHTML = opciones.map(op=>
+    `<div class="aten-mot" data-val="${op}">${op}</div>`
+  ).join("");
+
+  contenedor.onclick = function(e){
     const el = e.target.closest(".aten-mot");
     if(!el) return;
     document.querySelectorAll(".aten-mot").forEach(m=>m.classList.remove("sel"));
     el.classList.add("sel");
     atenMotivo = el.dataset.val;
   };
+
   document.getElementById("aten-ovl").style.display = "flex";
   document.body.style.overflow = "hidden";
 }
