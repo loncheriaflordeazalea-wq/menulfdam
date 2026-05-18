@@ -74,21 +74,18 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
 /* ── MODAL ── */
 #movl{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:600;display:none;align-items:flex-end;justify-content:center;}
 #movl.open{display:flex;}
-/* wrap contiene X fija + scroll + footer fijo abajo */
-#modal-wrap{position:relative;width:100%;max-width:680px;max-height:91vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;overflow:hidden;animation:sUp .26s ease;}
+#modal-wrap{width:100%;max-width:680px;max-height:91vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;overflow:hidden;animation:sUp .26s ease;}
 @keyframes sUp{from{transform:translateY(55px);opacity:0}to{transform:translateY(0);opacity:1}}
-/* X FLOTANTE — vive en el overlay, nunca en el scroll */
-#modal-x{display:none;position:absolute;bottom:calc(91vh + 8px);right:12px;z-index:660;
-  background:#fff;border:none;cursor:pointer;color:#333;
-  width:38px;height:38px;border-radius:50%;
-  align-items:center;justify-content:center;
-  font-weight:900;font-size:1.1rem;
-  box-shadow:0 2px 10px rgba(0,0,0,.3);transition:background .15s;}
-#modal-x:hover{background:#f0f0f0;}
-#movl.open #modal-x{display:flex;}
-/* contenido scrolleable — sin padding abajo grande */
+/* X completamente fija — siempre visible en pantalla */
+#modal-x{position:fixed;z-index:700;
+  background:#fff;border:2px solid #ddd;cursor:pointer;color:#333;
+  width:40px;height:40px;border-radius:50%;
+  display:none;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.15rem;
+  box-shadow:0 3px 12px rgba(0,0,0,.35);
+  /* posición: esquina superior derecha del modal — se calcula en JS */
+  bottom:auto;right:16px;top:auto;}
 #modal{background:var(--w);padding:15px 15px 8px;overflow-y:auto;flex:1;}
-/* footer fijo abajo — botón siempre visible */
 #modal-footer{background:var(--w);padding:8px 15px 22px;border-top:1.5px solid #f0f0f0;flex-shrink:0;}
 .m-handle{width:34px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 12px;}
 .m-title{font-family:'Bebas Neue',cursive;font-size:1.28rem;color:var(--p);padding-right:36px;}
@@ -593,10 +590,25 @@ function openModal(item){
   recalcM();
   document.getElementById("movl").classList.add("open");
   document.body.style.overflow="hidden";
+  // Posicionar X justo encima del panel — esperar a que el DOM pinte
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const wrap = document.getElementById("modal-wrap");
+      const rect = wrap.getBoundingClientRect();
+      const x = document.getElementById("modal-x");
+      x.style.top  = (rect.top - 50) + "px";
+      x.style.right = "16px";
+      x.style.display = "flex";
+    });
+  });
 }
 
 function ovlM(e){ if(e.target.id==="movl") closeModal(); }
-function closeModal(){ document.getElementById("movl").classList.remove("open"); document.body.style.overflow=""; }
+function closeModal(){
+  document.getElementById("movl").classList.remove("open");
+  document.getElementById("modal-x").style.display="none";
+  document.body.style.overflow="";
+}
 
 function togEx(i, nombre, precio, el){
   const idx = mExtras.findIndex(e=>e.nombre===nombre);
@@ -756,20 +768,13 @@ function abrirModalAtencion(){
   atenMotivo = "";
   document.getElementById("aten-nota").value = "";
 
-  // Construir opciones desde GS (atencion_opcion_1, _2, _3...)
+  // Opciones desde GS — el Apps Script las devuelve como array en cfg.atencion_opciones
   const contenedor = document.getElementById("aten-motivos");
-  const opciones = [];
-  let i = 1;
-  while(cfg[`atencion_opcion_${i}`]){
-    opciones.push(cfg[`atencion_opcion_${i}`]);
-    i++;
-  }
-  // Fallback si no hay opciones configuradas
-  if(!opciones.length){
-    opciones.push("📋 Necesito hacer un pedido","❓ Pregunta sobre el menú",
-      "🧾 Solicitar la cuenta","⚠️ Problema con mi pedido",
-      "💡 Dejar una sugerencia","💬 Otro motivo");
-  }
+  const opciones = Array.isArray(cfg.atencion_opciones) && cfg.atencion_opciones.length
+    ? cfg.atencion_opciones
+    : ["📋 Necesito hacer un pedido","❓ Pregunta sobre el menú",
+       "🧾 Solicitar la cuenta","⚠️ Problema con mi pedido",
+       "💡 Dejar una sugerencia","💬 Otro motivo"];
   contenedor.innerHTML = opciones.map(op=>
     `<div class="aten-mot" data-val="${op}">${op}</div>`
   ).join("");
@@ -798,8 +803,11 @@ function enviarAtencion(){
   if(!nombre){ alert("Por favor escribe tu nombre."); return; }
   if(!atenMotivo){ alert("Selecciona el motivo de tu solicitud."); return; }
   const nota = document.getElementById("aten-nota").value.trim();
-  let msg = `🔔 *Solicitud de Atención — ${cfg.header_titulo||"Flor de Azalea"}*\n\n`;
-  msg += `👤 *Nombre:* ${nombre}\n`;
+  let msg = `🔔 *Solicitud de Atención*\n`;
+  if(cfg.header_titulo)    msg += `🌸 *Sucursal:* ${cfg.header_titulo}\n`;
+  if(cfg.header_subtitulo) msg += `📍 *${cfg.header_subtitulo}*\n`;
+  if(cfg.direccion)        msg += `🗺️ *Dirección:* ${cfg.direccion}\n`;
+  msg += `\n👤 *Nombre:* ${nombre}\n`;
   msg += `📌 *Motivo:* ${atenMotivo}\n`;
   if(nota) msg += `💬 *Comentario:* ${nota}`;
   const tel = cfg.telefono_atencion || cfg.telefono || "";
