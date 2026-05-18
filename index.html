@@ -341,7 +341,7 @@ header{background:var(--p);color:var(--w);padding:11px 14px;display:flex;align-i
     <svg width="19" height="19" viewBox="0 0 32 32" fill="white"><path d="M16 3C8.82 3 3 8.82 3 16c0 2.39.63 4.63 1.74 6.57L3 29l6.57-1.72A12.93 12.93 0 0016 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm6.45 18.12c-.27.76-1.57 1.46-2.15 1.55-.55.08-1.25.12-2.01-.13-.46-.15-1.06-.35-1.82-.69-3.2-1.38-5.29-4.6-5.45-4.81-.16-.21-1.3-1.73-1.3-3.3s.82-2.34 1.11-2.66c.27-.3.59-.38.79-.38l.57.01c.18 0 .43-.07.67.51.27.64.9 2.2.98 2.36.08.16.13.35.03.56-.1.21-.16.34-.31.52-.16.18-.33.4-.47.54-.16.16-.32.33-.14.65.19.32.82 1.35 1.76 2.18 1.21 1.08 2.23 1.41 2.55 1.57.32.16.51.13.7-.08.19-.21.8-.93 1.01-1.25.21-.32.43-.27.72-.16.29.11 1.84.87 2.16 1.02.32.16.53.24.61.37.08.14.08.77-.19 1.52z"/></svg>
     Enviar Pedido por WhatsApp
   </button>
-  <button class="btn-atencion" onclick="abrirModalAtencion()">🔔 Solicitud de Atención</button>
+  <button id="btn-atencion" class="btn-atencion" onclick="abrirModalAtencion()">🔔 Solicitud de Atención</button>
 
   <div class="redes-panel" id="redes-panel" style="display:none">
     <p>Síguenos en redes</p>
@@ -449,6 +449,10 @@ function aplicarCfg(){
     b.innerHTML = cfg.banner_texto;
     b.style.display = "block";
   }
+
+  // Botón solicitud de atención
+  const btnAten = document.getElementById("btn-atencion");
+  if(btnAten) btnAten.style.display = esSI(cfg.atencion_activo ?? "SI") ? "flex" : "none";
 
   // Historia
   if(esSI(cfg.historia_activo) && cfg.historia_texto){
