@@ -428,7 +428,13 @@ function aplicarCfg(){
   // Logo desde GS
   if(cfg.logo_url && !cfg.logo_url.includes("PON_TU")){
     const img = document.getElementById("logo-img");
-    img.src = cfg.logo_url;
+    // Convertir URL de Drive a formato thumbnail (evita bloqueo CORS)
+    let logoSrc = cfg.logo_url;
+    const matchDrive = cfg.logo_url.match(/id=([a-zA-Z0-9_-]+)/);
+    if(matchDrive) {
+      logoSrc = `https://drive.google.com/thumbnail?id=${matchDrive[1]}&sz=w200`;
+    }
+    img.src = logoSrc;
     img.style.display = "block";
     document.getElementById("logo-fallback").style.display = "none";
     img.onerror = () => {
